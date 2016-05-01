@@ -1,5 +1,6 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -7,6 +8,7 @@ import java.util.ArrayList;
 
 public class SqlConnector {
 	static Connection connection;
+	static ResultSet rs;
 	
 	public SqlConnector() throws ClassNotFoundException{
 		
@@ -43,7 +45,7 @@ public class SqlConnector {
 			Statement statement = connection.createStatement();
 			statement.setQueryTimeout(30);
 			
-			ResultSet rs = statement.executeQuery("select count(Character_id) AS speciesNum From Character where species = \'" + speciesType + "\'");
+			rs = statement.executeQuery("select count(Character_id) AS speciesNum From Character where species = \'" + speciesType + "\'");
 			
 			
 			count = rs.getInt("speciesNum");
@@ -65,7 +67,7 @@ public class SqlConnector {
 			Statement statement = connection.createStatement();
 			statement.setQueryTimeout(30);
 			
-			ResultSet rs = statement.executeQuery("Select Movie_title From Movie, Series Where Movie.Series_id = Series.Series_id and world = \'" + universeName + "\'");
+			rs = statement.executeQuery("Select Movie_title From Movie, Series Where Movie.Series_id = Series.Series_id and world = \'" + universeName + "\'");
 			
 			while(rs.next()){
 				
@@ -82,75 +84,184 @@ public class SqlConnector {
 		
 	}
 		
-	}
 
 //sql queries should be obvious what they do from method names
-void moviesByReleaseDate() {
-	rs = statement.executeQuery("select movie_title from movie order by release_date;");
-}
+	public ArrayList<String> moviesByReleaseDate() throws SQLException {
+	
+		ArrayList<String> movieTitles = new ArrayList<String>();
+		
+		Statement statement = connection.createStatement();
+		statement.setQueryTimeout(30);
+	
+		rs = statement.executeQuery("select movie_title from movie order by release_date");
+	
+		while(rs.next()){
+			movieTitles.add(rs.getString("movie_title"));
+		}
+		
+		return movieTitles;
+	}
 
-void moviesByTimeline() {
-	rs = statement.executeQuery("select name, species from character_name natural join character order by species;")
-}
+	public ArrayList<String> moviesByTimeline() throws SQLException {
+	
+		ArrayList<String> movieTitles = new ArrayList<String>();
+	
+		Statement statement = connection.createStatement();
+		statement.setQueryTimeout(30);
 
-void listCharacters() {
-	rs = statement.executeQuery("select name from character_name natural join character order by species;");
-}
+		rs = statement.executeQuery("select movie_title from voie natural join abitrary_timeline order by Date");
+		
+		while(rs.next()){
+			movieTitles.add(rs.getString("movie_title"));
+		}
+		
+		return movieTitles;
+	}
 
-void listSeries() {
-	rs = statement.executeQuery("select world from series;");
-}
+	public ArrayList<String> listCharacters() throws SQLException {
+		
+		ArrayList<String> characterName = new ArrayList<String>();
+		
+		Statement statement = connection.createStatement();
+		statement.setQueryTimeout(30);
+		
+		rs = statement.executeQuery("select name from character_name natural join character order by species");
+		
+		while(rs.next()){
+			characterName.add(rs.getString("name"));
+		}
+		
+		return characterName;
+		
+	}
 
-void numberOfSpecies(String species) {
-	rs = statment.executeQuery("select count(characer_id) from character where species = \'" + species "\';");
-}
+	public ArrayList<String> listSeries() throws SQLException {
+		
+		ArrayList<String> worlds = new ArrayList<String>();
+		
+		Statement statement = connection.createStatement();
+		statement.setQueryTimeout(30);
+		
+		rs = statement.executeQuery("select world from series");
+		
+		while(rs.next()){
+			worlds.add(rs.getString("name"));
+		}
+		
+		return worlds;
+		
+	}
 
-void searchMovie(String movieName) {
-	rs = statement.executeQuery("select movie_title from movie where movie_title = \'" + species + "\';");
-}
+	public ArrayList<String> searchMovieByCharacter(String characterName) throws SQLException {
+		
+		ArrayList<String> movieTitles = new ArrayList<String>();
+		
+		Statement statement = connection.createStatement();
+		statement.setQueryTimeout(30);
+		
+		rs = statement.executeQuery("select movie_title from movie natural join exists_in natural join character_name where name = \'" + characterName + "\'");
+		
+		while(rs.next()){
+			movieTitles.add(rs.getString("movie_title"));
+		}
+		
+		return movieTitles;
+		
+	}	
 
-void searchMovieByCharacter(String characterName) {
-	rs = statement.executeQuery("select movie_title from movie natural join exists_in natural join character_name where name = \'" + characterName "\';");
-}
+	ArrayList<String> searchMovieByActor(String actorName) throws SQLException {
+		
+		ArrayList<String> movieTitles = new ArrayList<String>();
+		
+		Statement statement = connection.createStatement();
+		statement.setQueryTimeout(30);
+		
+		rs = statement.executeQuery("select movie_title from movie natural join acts_in natural join actor where actor_name = \'" + actorName + "\'");
+		
+		while(rs.next()){
+			movieTitles.add(rs.getString("movie_title"));
+		}
+		
+		return movieTitles;
+	}
 
-void searchMovieByWorld(String worldName) {
-	rs = statement.executeQuery("select movie_title from movie natural join series where world = \'" + worldName + "\';");
-}
+	ArrayList<String> searchMovieByDirector(String directorName) throws SQLException {
+		
+		ArrayList<String> movieTitles = new ArrayList<String>();
+		
+		Statement statement = connection.createStatement();
+		statement.setQueryTimeout(30);
+		
+		rs = statement.executeQuery("select movie_title from director where name = \'" + directorName + "\'");
+		
+		while(rs.next()){
+			movieTitles.add(rs.getString("movie_title"));
+		}
+		
+		return movieTitles;
+	}
 
-void searchMovieByActor(String actorName) {
-	rs = statement.executeQuery("select movie_title from movie natural join acts_in natural join actor where actor_name = \'" + actorName + "\';");
-}
+	public String characterInMostMovies() throws SQLException {
+		Statement statement = connection.createStatement();
+		statement.setQueryTimeout(30);
 
-void searchMovieByDirector(String directorName) {
-	rs = statement.executeQuery("select movie_title from director where name = \'" + directorName + "\';");
-}
-
-void characterInMostMovies() {
-	rs = statement.executeQuery("select name from character_name natural join character where character_id = (select character_id from character_name natural join exists_in group by character_id having max(count(*)));");
-}
+		rs = statement.executeQuery("select name from character_name natural join character where character_id = (select character_id from character_name natural join exists_in group by character_id having max(count(*)))");
+	
+		return rs.getString("name");
+	}
 
 //user manipulatoin of tables
-void userInsertIntoAbility(String abilityName, String characterName) {
-	//probably isn't called update
-	rs = statement.update("insert values into ability(\' + abilityName + "\', select character_id from character_name where name = \'" + characterName + "\');");
-}
+	void userInsertIntoAbility(String abilityName, String characterName) throws SQLException {
+	
+		
+		PreparedStatement ps =  connection.prepareStatement("insert values into ability(\'" + abilityName + "\', select character_id from character_name where name = \'" + characterName + "\')");
+		ps.executeUpdate();
+	}
 
-void userDeleteAbility(String abilityName, String characterName) {
+void userDeleteAbility(String abilityName, String characterName) throws SQLException {
 	//same as above I'm not sure what the command is
-	rs = statement.update(delete from ability where ability = \'" + abilityName + " and character_id = (select character_id from character_name where name = \'" + characterName + "\');");
+	PreparedStatement ps = connection.prepareStatement("delete from ability where ability = \'" + abilityName + " and character_id = (select character_id from character_name where name = \'" + characterName + "\');");
+
+	ps.executeUpdate();
 }
 
-void renameAnAbility(String oldName, String newName) {
+void renameAnAbility(String oldName, String newName) throws SQLException {
 	//once again not sure if it's called update
-	rs = statement.update(update ability set type = \'" + newName + "\' where type = \'" + oldName + "\';");
+	PreparedStatement ps = connection.prepareStatement("update ability set type = \'" + newName + "\' where type = \'" + oldName + "\'");
+
+	ps.execute();
 }
 
 //queries that use joins
-void listAbilitiesOfCharacter(String characterName) {
+ArrayList<String> listAbilitiesOfCharacter(String characterName) throws SQLException {
+	
+	ArrayList<String> abilities = new ArrayList<String>();
+	
+	Statement statement = connection.createStatement();
+	statement.setQueryTimeout(30);
+
 	rs = statement.executeQuery("select type from ability natural join character_name where character_name = \'" + characterName + "\';");
+	
+	while(rs.next()){
+		abilities.add(rs.getString("type"));
+	}
+	
+	return abilities;
+
 }
 
-void listSuperheroesWithNoPower() {
-	//I think the type = null should be not exists
+ArrayList<String> listSuperheroesWithNoPower() throws SQLException {
+	ArrayList<String> characterName = new ArrayList<String>();
+	
+	Statement statement = connection.createStatement();
+	statement.setQueryTimeout(30);
+
 	rs = statement.executeQuery("select name from character_name.character_id = ability.character_id where type = null;");
+	
+	while(rs.next()){
+		characterName.add(rs.getString("name"));
+	}
+	
+	return characterName;
+}
 }
