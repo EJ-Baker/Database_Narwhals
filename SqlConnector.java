@@ -84,6 +84,7 @@ public class SqlConnector {
 		
 	}
 
+//sql queries should be obvious what they do from method names
 void moviesByReleaseDate() {
 	rs = statement.executeQuery("select movie_title from movie order by release_date;");
 }
@@ -124,4 +125,32 @@ void searchMovieByDirector(String directorName) {
 	rs = statement.executeQuery("select movie_title from director where name = \'" + directorName + "\';");
 }
 
+void characterInMostMovies() {
+	rs = statement.executeQuery("select name from character_name natural join character where character_id = (select character_id from character_name natural join exists_in group by character_id having max(count(*)));");
+}
 
+//user manipulatoin of tables
+void userInsertIntoAbility(String abilityName, String characterName) {
+	//probably isn't called update
+	rs = statement.update("insert values into ability(\' + abilityName + "\', select character_id from character_name where name = \'" + characterName + "\');");
+}
+
+void userDeleteAbility(String abilityName, String characterName) {
+	//same as above I'm not sure what the command is
+	rs = statement.update(delete from ability where ability = \'" + abilityName + " and character_id = (select character_id from character_name where name = \'" + characterName + "\');");
+}
+
+void renameAnAbility(String oldName, String newName) {
+	//once again not sure if it's called update
+	rs = statement.update(update ability set type = \'" + newName + "\' where type = \'" + oldName + "\';");
+}
+
+//queries that use joins
+void listAbilitiesOfCharacter(String characterName) {
+	rs = statement.executeQuery("select type from ability natural join character_name where character_name = \'" + characterName + "\';");
+}
+
+void listSuperheroesWithNoPower() {
+	//I think the type = null should be not exists
+	rs = statement.executeQuery("select name from character_name.character_id = ability.character_id where type = null;");
+}
