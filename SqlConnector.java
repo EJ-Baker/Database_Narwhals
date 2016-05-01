@@ -23,6 +23,12 @@ public class SqlConnector {
 	    } 
 	}
 	
+	public static void main(String[] args) throws ClassNotFoundException, SQLException{
+		new SqlConnector();
+		
+		System.out.println(characterInMostMovies());
+	}
+	
 	public static void closeConnection(){
 		
 		try  {
@@ -86,7 +92,7 @@ public class SqlConnector {
 		
 
 //sql queries should be obvious what they do from method names
-	public ArrayList<String> moviesByReleaseDate() throws SQLException {
+	public static ArrayList<String> moviesByReleaseDate() throws SQLException {
 	
 		ArrayList<String> movieTitles = new ArrayList<String>();
 		
@@ -102,14 +108,14 @@ public class SqlConnector {
 		return movieTitles;
 	}
 
-	public ArrayList<String> moviesByTimeline() throws SQLException {
+	public static ArrayList<String> moviesByTimeline(String universeName) throws SQLException {
 	
 		ArrayList<String> movieTitles = new ArrayList<String>();
 	
 		Statement statement = connection.createStatement();
 		statement.setQueryTimeout(30);
 
-		rs = statement.executeQuery("select movie_title from voie natural join abitrary_timeline order by Date");
+		rs = statement.executeQuery("select movie_title from movie natural join abitrary_timeline where movie_title in (Select Movie_title From Movie, Series Where Movie.Series_id = Series.Series_id and world = \'" + universeName + "\') order by Date");
 		
 		while(rs.next()){
 			movieTitles.add(rs.getString("movie_title"));
@@ -118,7 +124,7 @@ public class SqlConnector {
 		return movieTitles;
 	}
 
-	public ArrayList<String> listCharacters() throws SQLException {
+	public static ArrayList<String> listCharacters() throws SQLException {
 		
 		ArrayList<String> characterName = new ArrayList<String>();
 		
@@ -135,7 +141,7 @@ public class SqlConnector {
 		
 	}
 
-	public ArrayList<String> listSeries() throws SQLException {
+	public static ArrayList<String> listSeries() throws SQLException {
 		
 		ArrayList<String> worlds = new ArrayList<String>();
 		
@@ -145,14 +151,14 @@ public class SqlConnector {
 		rs = statement.executeQuery("select world from series");
 		
 		while(rs.next()){
-			worlds.add(rs.getString("name"));
+			worlds.add(rs.getString("world"));
 		}
 		
 		return worlds;
 		
 	}
 
-	public ArrayList<String> searchMovieByCharacter(String characterName) throws SQLException {
+	public static ArrayList<String> searchMovieByCharacter(String characterName) throws SQLException {
 		
 		ArrayList<String> movieTitles = new ArrayList<String>();
 		
@@ -169,7 +175,7 @@ public class SqlConnector {
 		
 	}	
 
-	ArrayList<String> searchMovieByActor(String actorName) throws SQLException {
+	static ArrayList<String> searchMovieByActor(String actorName) throws SQLException {
 		
 		ArrayList<String> movieTitles = new ArrayList<String>();
 		
@@ -185,7 +191,7 @@ public class SqlConnector {
 		return movieTitles;
 	}
 
-	ArrayList<String> searchMovieByDirector(String directorName) throws SQLException {
+	static ArrayList<String> searchMovieByDirector(String directorName) throws SQLException {
 		
 		ArrayList<String> movieTitles = new ArrayList<String>();
 		
@@ -201,7 +207,7 @@ public class SqlConnector {
 		return movieTitles;
 	}
 
-	public String characterInMostMovies() throws SQLException {
+	public static String characterInMostMovies() throws SQLException {
 		Statement statement = connection.createStatement();
 		statement.setQueryTimeout(30);
 
