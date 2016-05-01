@@ -83,3 +83,45 @@ public class SqlConnector {
 	}
 		
 	}
+
+void moviesByReleaseDate() {
+	rs = statement.executeQuery("select movie_title from movie order by release_date;");
+}
+
+void moviesByTimeline() {
+	rs = statement.executeQuery("select name, species from character_name natural join character order by species;")
+}
+
+void listCharacters() {
+	rs = statement.executeQuery("select name from character_name natural join character order by species;");
+}
+
+void listSeries() {
+	rs = statement.executeQuery("select world from series;");
+}
+
+void numberOfSpecies(String species) {
+	rs = statment.executeQuery("select count(characer_id) from character where species = \'" + species "\';");
+}
+
+void searchMovie(String movieName) {
+	rs = statement.executeQuery("select movie_title from movie where movie_title = \'" + species + "\';");
+}
+
+void searchMovieByCharacter(String characterName) {
+	rs = statement.executeQuery("select movie_title from movie natural join exists_in natural join character_name where name = \'" + characterName "\';");
+}
+
+void searchMovieByWorld(String worldName) {
+	rs = statement.executeQuery("select movie_title from movie natural join series where world = \'" + worldName + "\';");
+}
+
+void searchMovieByActor(String actorName) {
+	rs = statement.executeQuery("select movie_title from movie natural join acts_in natural join actor where actor_name = \'" + actorName + "\';");
+}
+
+void searchMovieByDirector(String directorName) {
+	rs = statement.executeQuery("select movie_title from director where name = \'" + directorName + "\';");
+}
+
+
