@@ -1,0 +1,27 @@
+List Movies by release date:
+	SELECT Movie_title
+	FROM Movie
+	ORDER BY Release_date;
+
+List Movies by timeline:
+	//todo
+
+List characters by species:
+	SELECT Name, Species
+	FROM Character_name NATURAL JOIN Character
+	ORDER BY Species;
+
+List characters:
+	SELECT NAME FROM 
+	Character_name NATURAL JOIN Character;
+
+List series:
+	SELECT World
+	FROM Series;
+
+Count the number of characters that are human;
+	SELECT COUNT(Character_id)
+	From Character
+	Where Species = 'Human';
+
+
